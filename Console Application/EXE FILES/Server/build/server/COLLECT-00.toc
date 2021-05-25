@@ -1,15 +1,16 @@
 ([('server.exe',
-   'D:\\Disk Third\\Github\\Python_TCPChatroom\\build\\server\\server.exe',
+   'D:\\Disk Third\\Github\\Python_TCPChatroom\\Console '
+   'Application\\build\\server\\server.exe',
    'EXECUTABLE'),
   ('server.exe.manifest',
-   'D:\\Disk '
-   'Third\\Github\\Python_TCPChatroom\\build\\server\\server.exe.manifest',
-   'BINARY'),
-  ('VCRUNTIME140.dll',
-   'c:\\users\\szabo\\appdata\\local\\programs\\python\\python39\\VCRUNTIME140.dll',
+   'D:\\Disk Third\\Github\\Python_TCPChatroom\\Console '
+   'Application\\build\\server\\server.exe.manifest',
    'BINARY'),
   ('python39.dll',
    'c:\\users\\szabo\\appdata\\local\\programs\\python\\python39\\python39.dll',
+   'BINARY'),
+  ('VCRUNTIME140.dll',
+   'c:\\users\\szabo\\appdata\\local\\programs\\python\\python39\\VCRUNTIME140.dll',
    'BINARY'),
   ('_multiprocessing',
    'c:\\users\\szabo\\appdata\\local\\programs\\python\\python39\\DLLs\\_multiprocessing.pyd',
@@ -63,8 +64,8 @@
    'c:\\users\\szabo\\appdata\\local\\programs\\python\\python39\\DLLs\\libffi-7.dll',
    'BINARY'),
   ('base_library.zip',
-   'D:\\Disk '
-   'Third\\Github\\Python_TCPChatroom\\build\\server\\base_library.zip',
+   'D:\\Disk Third\\Github\\Python_TCPChatroom\\Console '
+   'Application\\build\\server\\base_library.zip',
    'DATA'),
   ('Include\\pyconfig.h',
    'c:\\users\\szabo\\appdata\\local\\programs\\python\\python39\\Include\\pyconfig.h',

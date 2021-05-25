@@ -1,4 +1,5 @@
-('D:\\Disk Third\\Github\\Python_TCPChatroom\\build\\server\\server.exe',
+('D:\\Disk Third\\Github\\Python_TCPChatroom\\Console '
+ 'Application\\build\\server\\server.exe',
  True,
  False,
  True,
@@ -10,7 +11,8 @@
  True,
  'server.pkg',
  [('PYZ-00.pyz',
-   'D:\\Disk Third\\Github\\Python_TCPChatroom\\build\\server\\PYZ-00.pyz',
+   'D:\\Disk Third\\Github\\Python_TCPChatroom\\Console '
+   'Application\\build\\server\\PYZ-00.pyz',
    'PYZ'),
   ('struct',
    'c:\\users\\szabo\\appdata\\local\\programs\\python\\python39\\lib\\struct.pyo',
@@ -31,16 +33,16 @@
    'C:\\Users\\szabo\\AppData\\Local\\Programs\\Python\\Python39\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_multiprocessing.py',
    'PYSOURCE'),
   ('server',
-   'D:\\Disk Third\\Github\\Python_TCPChatroom\\server.py',
+   'D:\\Disk Third\\Github\\Python_TCPChatroom\\Console Application\\server.py',
    'PYSOURCE'),
   ('server.exe.manifest',
-   'D:\\Disk '
-   'Third\\Github\\Python_TCPChatroom\\build\\server\\server.exe.manifest',
+   'D:\\Disk Third\\Github\\Python_TCPChatroom\\Console '
+   'Application\\build\\server\\server.exe.manifest',
    'BINARY')],
  [],
  False,
  False,
- 1621971832,
+ 1621973059,
  [('run.exe',
    'c:\\users\\szabo\\appdata\\local\\programs\\python\\python39\\lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit\\run.exe',
    'EXECUTABLE')])
