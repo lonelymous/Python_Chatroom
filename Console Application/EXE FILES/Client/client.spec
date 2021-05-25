@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['client.py'],
-             pathex=['D:\\Disk Third\\Github\\Python_TCPChatroom'],
+             pathex=['D:\\Disk Third\\Github\\Python_TCPChatroom\\Console Application'],
              binaries=[],
              datas=[],
              hiddenimports=[],

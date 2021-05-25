@@ -1,4 +1,5 @@
-('D:\\Disk Third\\Github\\Python_TCPChatroom\\build\\client\\client.exe',
+('D:\\Disk Third\\Github\\Python_TCPChatroom\\Console '
+ 'Application\\build\\client\\client.exe',
  True,
  False,
  True,
@@ -10,7 +11,8 @@
  True,
  'client.pkg',
  [('PYZ-00.pyz',
-   'D:\\Disk Third\\Github\\Python_TCPChatroom\\build\\client\\PYZ-00.pyz',
+   'D:\\Disk Third\\Github\\Python_TCPChatroom\\Console '
+   'Application\\build\\client\\PYZ-00.pyz',
    'PYZ'),
   ('struct',
    'c:\\users\\szabo\\appdata\\local\\programs\\python\\python39\\lib\\struct.pyo',
@@ -31,16 +33,16 @@
    'C:\\Users\\szabo\\AppData\\Local\\Programs\\Python\\Python39\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_multiprocessing.py',
    'PYSOURCE'),
   ('client',
-   'D:\\Disk Third\\Github\\Python_TCPChatroom\\client.py',
+   'D:\\Disk Third\\Github\\Python_TCPChatroom\\Console Application\\client.py',
    'PYSOURCE'),
   ('client.exe.manifest',
-   'D:\\Disk '
-   'Third\\Github\\Python_TCPChatroom\\build\\client\\client.exe.manifest',
+   'D:\\Disk Third\\Github\\Python_TCPChatroom\\Console '
+   'Application\\build\\client\\client.exe.manifest',
    'BINARY')],
  [],
  False,
  False,
- 1621971786,
+ 1621972464,
  [('run.exe',
    'c:\\users\\szabo\\appdata\\local\\programs\\python\\python39\\lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit\\run.exe',
    'EXECUTABLE')])
