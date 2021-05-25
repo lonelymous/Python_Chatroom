@@ -1,4 +1,5 @@
 import threading, socket
+from playsound import playsound
 
 host = input("IP ADDRESS: ")
 
@@ -32,6 +33,7 @@ def receive():
                     stop_thread = True
             else:
                 print(message)
+                playsound('discord-notification.mp3')
         except:
             print("An error occurred!")
             client.close()
