@@ -48,6 +48,8 @@ def write():
                     client.send(f'KICK {message[len(nickname)+2+6:]}'.encode('utf-8'))
                 elif message[len(nickname)+2:].startswith('/ban'):
                     client.send(f'BAN {message[len(nickname)+2+5:]}'.encode('utf-8'))
+            elif message[len(nickname)+2:].startswith('/exit'):
+                client.close()
             else:
                 print("Commands can only be executed by the admin!")
         else:
