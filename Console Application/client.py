@@ -6,7 +6,9 @@ host = input("IP ADDRESS: ")
 nickname = input("Choose a nickname: ")
 if nickname == 'admin':
     password = input("Enter password for admin: ")
-    
+
+psound = True
+
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect((host, 42069))
 
@@ -33,13 +35,15 @@ def receive():
                     stop_thread = True
             else:
                 print(message)
-                playsound('discord-notification.mp3')
+                if psound:
+                    playsound('discord-notification.mp3')
         except:
             print("An error occurred!")
             client.close()
             break
 
 def write():
+    global psound
     while True:
         if stop_thread:
             break
@@ -52,6 +56,12 @@ def write():
                     client.send(f'BAN {message[len(nickname)+2+5:]}'.encode('utf-8'))
             elif message[len(nickname)+2:].startswith('/exit'):
                 client.close()
+            elif message[len(nickname)+2:].startswith('/mute'):
+                client.send(f"OS {nickname} muted the application".encode('utf-8'))
+                psound = False
+            elif message[len(nickname)+2:].startswith('/unmute'):
+                client.send(f"OS {nickname} unmuted the application".encode('utf-8'))
+                psound = True
             else:
                 print("Commands can only be executed by the admin!")
         else:

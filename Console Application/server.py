@@ -33,7 +33,8 @@ def handle(client):
                 else:
                     client.send('Command was refused!'.encode('utf-8'))
             else:
-                broadcast(message)
+                if not msg.decode('utf-8').startswith('OS'):
+                    broadcast(message)
                 print(message.decode('utf-8'))
         except:
             index = clients.index(client)
