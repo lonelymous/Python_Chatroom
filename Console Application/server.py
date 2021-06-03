@@ -1,9 +1,17 @@
 import threading, socket
 
-ip = input("Server ip: ")
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.connect(("8.8.8.8", 80))
+ipAddress = s.getsockname()[0]
+portNumber = 42069
+
+if input("Other IP?:").__contains__('y'):
+    ip = input("Server ip and port: ")
+    ipAddress = ip.split(':')[0]
+    portNumber = int(ip.split(':')[1])
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind((ip, 42069))
+server.bind((ipAddress, portNumber))
 server.listen()
 
 clients = []

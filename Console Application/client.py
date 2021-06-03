@@ -1,7 +1,15 @@
 import threading, socket
 from playsound import playsound
 
-host = input("IP ADDRESS: ")
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.connect(("8.8.8.8", 80))
+ipAddress = s.getsockname()[0]
+portNumber = 42069
+
+if input("Other IP?:").__contains__('y'):
+    ip = input("Server ip and port: ")
+    ipAddress = ip.split(':')[0]
+    portNumber = int(ip.split(':')[1])
 
 nickname = input("Choose a nickname: ")
 if nickname == 'admin':
@@ -10,7 +18,7 @@ if nickname == 'admin':
 psound = True
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect((host, 42069))
+client.connect((ipAddress, portNumber))
 
 stop_thread = False
 
