@@ -65,10 +65,10 @@ def write():
             elif message[len(nickname)+2:].startswith('/exit'):
                 client.close()
             elif message[len(nickname)+2:].startswith('/mute'):
-                client.send(f"OS {nickname} muted the application".encode('utf-8'))
+                client.send(f"{nickname} muted the application".encode('utf-8'))
                 psound = False
             elif message[len(nickname)+2:].startswith('/unmute'):
-                client.send(f"OS {nickname} unmuted the application".encode('utf-8'))
+                client.send(f"{nickname} unmuted the application".encode('utf-8'))
                 psound = True
             else:
                 print("Commands can only be executed by the admin!")
