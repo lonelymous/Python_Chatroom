@@ -1,3 +1,11 @@
+import threading, socket,os,time
+SEPARATOR = "<SEPARATOR>"
+BUFFER = 8192
+clients = []
+nicknames = []
+messages = []
+log = []
+
 import threading, socket,time
 BUFFER = 8192
 clients = []
@@ -6,7 +14,8 @@ messages = []
 log = []
 
 def correctTime(date):
-    if len(str(date)) < 2:
+    date = str(date)
+    if len(date) < 2:
         return "0" + date
     else:
         return date
@@ -34,7 +43,9 @@ def handle(client):
             msg = client.recv(BUFFER)
             broadcast(msg,client)
             hm = msg.decode('utf-8')[4:]
-        except Exception:
+            if hm.startswith('/send'):
+                ReceiveSendFile(hm,client)
+        except:
             clients.remove(client)
             client.close()
             broadcast(f'{nickname} left the chat.'.encode('utf-8'),"")
@@ -80,6 +91,33 @@ def kick_user(name):
         client_to_kick.close()
         nicknames.remove(name)
         broadcast(f'{name} was kicked by an admin!'.encode('utf-8'),"")
+
+def ReceiveSendFile(message,client):
+    try:
+        received = client.recv(BUFFER).decode()
+        filename, filesize = received.split(SEPARATOR)
+        # remove absolute path if there is
+        filename = os.path.basename(filename)
+        # convert to integer
+        filesize = int(filesize)
+        # start receiving the file from the socket
+        # and writing to the file stream
+        with open(filename, "wb") as f:
+            while True:
+                # read 1024 bytes from the socket (receive)
+                bytes_read = client.recv(BUFFER)
+                if not bytes_read:    
+                    # nothing is received
+                    # file transmitting is done
+                    break
+                # write to the file the bytes we just received
+                f.write(bytes_read)
+        f.close()
+        print("Done..")
+        # close the client socket
+        client.close()
+    except:
+        pass
 
 if __name__ == "__main__":
     #Bekérjük az IP-t amennyiben üresen hagyja akkor az alapértelmezettel fut tovább
