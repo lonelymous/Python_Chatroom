@@ -52,7 +52,8 @@ def receive():
         with open('bans.txt', 'r') as f:
             bans = f.readlines()
         #
-        if nickname+'\n' in bans:
+        if address[0] in bans:
+            client.send('You are banned from the server!'.encode('utf-8'))
             client.close()
             continue
         #
