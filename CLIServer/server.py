@@ -72,7 +72,7 @@ def Receive():
         thread = threading.Thread(target=Handle, args=(client,))
         thread.start()
 
-def kick_user(name):
+def Kick_user(name):
     if name in nicknames:
         name_index = nicknames.index(name)
         client_to_kick = clients[name_index]
