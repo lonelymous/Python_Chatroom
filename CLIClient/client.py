@@ -4,7 +4,7 @@ BUFFER = 8192
 psound = False
 stop_thread = False
 
-def receive():
+def Receive():
     while True:
         global stop_thread
         if stop_thread:
@@ -23,7 +23,7 @@ def receive():
             client.close()
             break
         
-def write():
+def Write():
     #Globális változót hozunk létre a psound-ból.
     global psound,stop_thread
     while True:
@@ -79,8 +79,8 @@ if __name__ == "__main__":
     client.connect((ipAddress, portNumber))
     client.send(nickname.encode('utf-8'))
 
-    receive_thread = threading.Thread(target=receive)
+    receive_thread = threading.Thread(target=Receive)
     receive_thread.start()
 
-    write_thread = threading.Thread(target=write)
+    write_thread = threading.Thread(target=Write)
     write_thread.start()
