@@ -83,20 +83,9 @@ def kick_user(name):
         broadcast(f'{name} was kicked by an admin!'.encode('utf-8'),"")
 
 if __name__ == "__main__":
-    #Bekérjük az IP-t amennyiben üresen hagyja akkor az alapértelmezettel fut tovább
-    ip = input("Server ip and port: ")
-    if ip:
-        ipAddress = ip.split(':')[0]
-        portNumber = int(ip.split(':')[1])
-    else:
-        #Felcsatlakozik a Google szervereire majd azt az IP-t menti el amivel csatlakozott.
-        #Ezzel kizárjuk a VirtualBoxos IP-k használatát.
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        ipAddress = s.getsockname()[0]
-        portNumber = 42069
-        s.close()
-
+    ipAddress = "0.0.0.0"
+    portNumber = 42069
+    
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((ipAddress, portNumber))
     server.listen()
