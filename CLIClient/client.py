@@ -18,8 +18,8 @@ def Receive():
                     playsound('discord-notification.mp3')
                 except Exception:
                     print("Error with playing sound")
-        except Exception:
-            print("An error occurred!")
+        except Exception as e:
+            print(f"Error: {e}")
             client.close()
             break
         
@@ -27,33 +27,38 @@ def Write():
     #Globális változót hozunk létre a psound-ból.
     global psound,stop_thread
     while True:
-        #Ha lekell állnia akkor álljon le.
-        if stop_thread:
-            break
-        #bekérjük az üzenetet a felhasználótól
-        message = input()
-        #Megnézzük, hogy valamilyen parancs-e, ha nem akkor csak kiírjuk.
-        if message.startswith('/'):
-            ### exit command
-            if message.startswith('/exit'):
-                print("You left the chat.")
-                stop_thread = True
-                client.close()
-            ### mute command
-            elif message.startswith('/mute'):
-                print("You muted the application")
-                client.send(f"[+] {nickname} muted the application".encode('utf-8'))
-                psound = False
-            ### unmute command
-            elif message.startswith('/unmute'):
-                print("You unmuted the application")
-                client.send(f"[+] {nickname} unmuted the application".encode('utf-8'))
-                psound = True
-            ###
+        try:
+            #Ha lekell állnia akkor álljon le.
+            if stop_thread:
+                break
+            #bekérjük az üzenetet a felhasználótól
+            message = input().strip()
+            if message == "":
+                continue
+            #Megnézzük, hogy valamilyen parancs-e, ha nem akkor csak kiírjuk.
+            if message.startswith('/'):
+                ### exit command
+                if message.startswith('/exit'):
+                    print("You left the chat.")
+                    stop_thread = True
+                    client.close()
+                ### mute command
+                elif message.startswith('/mute'):
+                    print("You muted the application")
+                    client.send(f"[+] {nickname} muted the application".encode('utf-8'))
+                    psound = False
+                ### unmute command
+                elif message.startswith('/unmute'):
+                    print("You unmuted the application")
+                    client.send(f"[+] {nickname} unmuted the application".encode('utf-8'))
+                    psound = True
+                ###
+                else:
+                    print("Error")
             else:
-                print("Error")
-        else:
-            client.send(f"{nickname}> {message}".encode('utf-8'))
+                client.send(f"{nickname}> {message}".encode('utf-8'))
+        except Exception as e:
+            print(f"Error: {e}")
 
 ###########################################################################################
 if __name__ == "__main__":
