@@ -82,5 +82,5 @@ if __name__ == "__main__":
     receive_thread = threading.Thread(target=Receive)
     receive_thread.start()
 
-    write_thread = threading.Thread(target=Write)
+    write_thread = threading.Thread(target=wWrite)
     write_thread.start()
