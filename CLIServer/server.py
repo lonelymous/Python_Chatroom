@@ -5,13 +5,13 @@ nicknames = []
 messages = []
 log = []
 
-def correctTime(date):
+def CorrectTime(date):
     if len(str(date)) < 2:
         return "0" + date
     else:
         return date
 
-def broadcast(message,sender):
+def Broadcast(message,sender):
     #Dekódoljuk az üzenetet
     msg = message.decode('utf-8')
     #Ami nem szerver üzenet azt ne küldük el
@@ -22,26 +22,26 @@ def broadcast(message,sender):
                 client.send(msg.encode('utf-8'))
     #Mindent logolunk, hogy Zuki bácsi büszke legyen ránk
     f = open(f"{time.localtime().tm_year}.{time.localtime().tm_mon}.{time.localtime().tm_mday}-log.txt", "a")
-    f.write(f"{correctTime(time.localtime().tm_hour)}:{correctTime(time.localtime().tm_min)}:{correctTime(time.localtime().tm_sec)}-{msg}\n")
+    f.write(f"{CorrectTime(time.localtime().tm_hour)}:{CorrectTime(time.localtime().tm_min)}:{CorrectTime(time.localtime().tm_sec)}-{msg}\n")
     print(msg)
     f.close()
 
-def handle(client):
+def Handle(client):
     while True:
         index = clients.index(client)
         nickname = nicknames[index]
         try:
             msg = client.recv(BUFFER)
-            broadcast(msg,client)
+            Broadcast(msg,client)
             hm = msg.decode('utf-8')[4:]
         except Exception:
             clients.remove(client)
             client.close()
-            broadcast(f'{nickname} left the chat.'.encode('utf-8'),"")
+            Broadcast(f'{nickname} left the chat.'.encode('utf-8'),"")
             nicknames.remove(nickname)
             break
 
-def receive():
+def Receive():
     while True:
         #
         client, address = server.accept()
@@ -60,7 +60,7 @@ def receive():
         nicknames.append(nickname)
         clients.append(client)
         #
-        broadcast(f'{nickname} joined the chat!'.encode('utf-8'),client)
+        Broadcast(f'{nickname} joined the chat!'.encode('utf-8'),client)
         client.send('Connected to the server!'.encode('utf-8'))
         #
         if messages is not None:
@@ -69,10 +69,10 @@ def receive():
                 client.send((message + "\n").encode('utf-8'))
             client.send("-------------------------------------".encode('utf-8'))
         #
-        thread = threading.Thread(target=handle, args=(client,))
+        thread = threading.Thread(target=Handle, args=(client,))
         thread.start()
 
-def kick_user(name):
+def Kick_user(name):
     if name in nicknames:
         name_index = nicknames.index(name)
         client_to_kick = clients[name_index]
@@ -80,25 +80,14 @@ def kick_user(name):
         client_to_kick.send('You were kicked by an admin!'.encode('utf-8'))
         client_to_kick.close()
         nicknames.remove(name)
-        broadcast(f'{name} was kicked by an admin!'.encode('utf-8'),"")
+        Broadcast(f'{name} was kicked by an admin!'.encode('utf-8'),"")
 
 if __name__ == "__main__":
-    #Bekérjük az IP-t amennyiben üresen hagyja akkor az alapértelmezettel fut tovább
-    ip = input("Server ip and port: ")
-    if ip:
-        ipAddress = ip.split(':')[0]
-        portNumber = int(ip.split(':')[1])
-    else:
-        #Felcsatlakozik a Google szervereire majd azt az IP-t menti el amivel csatlakozott.
-        #Ezzel kizárjuk a VirtualBoxos IP-k használatát.
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        ipAddress = s.getsockname()[0]
-        portNumber = 42069
-        s.close()
-
+    ipAddress = "0.0.0.0"
+    portNumber = 42069
+    
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((ipAddress, portNumber))
     server.listen()
     print("Server is listening...")
-    receive()
+    Receive()
