@@ -24,23 +24,15 @@ def CreateHeader(source_address, mode, destination_addres, counter):
     return "<" + FixIP(source_address) + mode + FixIP(destination_addres) + "|" + FixCounter(counter) + ">"
 
 def GetPacket(packet):
-    print(f"DEBUG - packet: {packet}")
     header = packet[:40]
-    print(f"DEBUG - header: {header}")
     data = packet[40:]
-    print(f"DEBUG - data: {data}")
     return header, data
 
 def GetHeader(header):
-    print(f"DEBUG - header: {header}")
     source_address = header[1:15]
-    print(f"DEBUG - source_address: {source_address}")
     mode = header[16]
-    print(f"DEBUG - mode: {mode}")
     destination_addres = header[17:32]
-    print(f"DEBUG - destination_addres: {destination_addres}")
     counter = header[33:39]
-    print(f"DEBUG - counter: {counter}")
     return source_address, mode, destination_addres, counter
 
 def Receive():
