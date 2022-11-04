@@ -98,14 +98,5 @@ def Exit(signum, frame):
         server.close()
         exit(1)
 
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-if __name__ == "__main__":
-    signal.signal(signal.SIGINT, Exit)
-    ipAddress = "0.0.0.0"
-    portNumber = 42069
 
-    server.bind((ipAddress, portNumber))
-    server.listen()
-    print("Server is listening...")
-    Receive()

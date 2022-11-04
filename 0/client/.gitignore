@@ -6,4 +6,3 @@
 CLI*/build
 CLIServer/bans.txt
 CLIServer/*log.txt
-get-pip.py
