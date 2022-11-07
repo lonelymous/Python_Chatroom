@@ -1,3 +1,4 @@
+from multiprocessing.connection import Client
 import threading
 import socket
 
@@ -70,7 +71,18 @@ def GetHeader(header):
     counter = header[33:39]
     return source_address, mode, destination_addres, counter
 
-def Broadcast(message,sender):
+def PacketToUser(user, message):
+    user.Client.send(CreatePacket(CreateHeader(local_address, "M", user.Address, "0"), message).encode('utf-8'))
+
+def BroadcastMessage(message):
+    messages.append(message)
+    for user in users:
+        if user == server_user:
+            print(message)
+            continue
+        user.Client.send(CreatePacket(CreateHeader(local_address, "M", user.Address, "0"), message).encode('utf-8'))
+
+def BroadcastPacket(message, sender):
     try:
         header, data = GetPacket(message.decode('utf-8'))
         source_address, mode, destination_addres, counter = GetHeader(header)
@@ -85,22 +97,60 @@ def Broadcast(message,sender):
                     if user == server_user:
                         print(message)
                         continue
-                    header = CreateHeader(source_address, "M", user.Address, "0")
-                    user.Client.send(CreatePacket(header, message).encode('utf-8'))
+                    user.Client.send(CreatePacket(CreateHeader(source_address, "M", user.Address, "0"), message).encode('utf-8'))
     except Exception as e:
         print(f"Broadcast - error: {e}")
 
 def Handle(user):
     while True:
         try:
-            Broadcast(user.Client.recv(BUFFER),user)
+            BroadcastPacket(user.Client.recv(BUFFER),user)
         except Exception as e:
             print(f"Handle - error: {e}")
             users.remove(user)
             user.Client.close()
-            header = CreateHeader(local_address, "M", "255.255.255.255", "0")
-            Broadcast(CreatePacket(header, f'{user.Nickname} left the chat.'.encode('utf-8'),None))
+            BroadcastMessage(f"{user.Nickname} left the chat.",None)
             break
+
+def GetLastMessages(user):
+    if messages is not None:
+        PacketToUser(user, "\n----- L A S T   M E S S A G E S -----\n")
+        for message in messages:
+            PacketToUser(user, message + "\n")
+        PacketToUser(user, "---------------------------------------")
+
+def Receive():
+    global stop_thread
+    while True:
+        if stop_thread:
+            break
+        client, address = server.accept()
+        print(f"Connected with {str(address)}")
+        
+        header, data = GetPacket(client.recv(BUFFER).decode('utf-8'))
+        source_address, mode, destination_addres, counter = GetHeader(header)
+        
+        data_items = data.split('|')
+        nickname = data_items[0]
+
+        isAdmin=False
+        #//TODO save admin user to an .ini file.
+        if nickname == "admin":
+            if data_items[1] == "admin123":
+                isAdmin=True
+            else:
+                # I can't use PacketToUser() method because we don't initalize user yet.
+                client.send(CreatePacket(CreateHeader(local_address, "M", address, "0"), 'Authentication failed!').encode('utf-8'))
+        
+        user = User(nickname=nickname, client=client, address=source_address, isAdmin=isAdmin, isServer=False)
+        users.append(user)
+
+        BroadcastMessage(f"{user.Nickname} joined the chat!",user)
+        PacketToUser(user, "Connected to the server!")
+
+        #thread for handle
+        thread = threading.Thread(target=Handle, args=(user,))
+        thread.start()
 
 def Write():
     global stop_thread
@@ -115,54 +165,13 @@ def Write():
                 stop_thread = True
                 continue
             else:
-                Broadcast(message.encode('utf-8'), server_user)
+                BroadcastMessage(message, server_user)
         except EOFError:
             if input("Are you sure you wanna shutdown the server? (y/n)").lower() == "y":
                 break
         except Exception as e:
             print(f"Error in write_thread: {e}")
     ShutdownServer()
-
-def GetLastMessages(user):
-    if messages is not None:
-        user.Client.send("\n----- L A S T   M E S S A G E S -----\n".encode('utf-8'))
-        for message in messages:
-            user.Client.send((message + "\n").encode('utf-8'))
-        user.Client.send("-------------------------------------".encode('utf-8'))
-
-def Receive():
-    global stop_thread
-    while True:
-        if stop_thread:
-            break
-        client, address = server.accept()
-        print(f"Connected with {str(address)}")
-        
-        header, data = GetPacket(client.recv(BUFFER).decode('utf-8'))
-        source_address, mode, destination_addres, counter = GetHeader(header)
-
-        if mode.lower() != "l":
-            continue
-        
-        data_items = data.split('|')
-        nickname = data_items[0]
-        password = data_items[1]
-
-        isAdmin=False
-        if nickname == "admin" and password == "admin123":
-            isAdmin=True
-        
-        user = User(nickname=nickname, client=client, address=source_address, isAdmin=isAdmin, isServer=False)
-        users.append(user)
-
-        header = CreateHeader(local_address, "M", "255.255.255.255", "0")
-        Broadcast(CreatePacket(header, f'{user.Nickname} joined the chat!').encode('utf-8'),user)
-        header = CreateHeader(local_address, "M", user.Address, "0")
-        user.Client.send(CreatePacket(header, 'Connected to the server!').encode('utf-8'))
-
-        #thread for handle
-        thread = threading.Thread(target=Handle, args=(user,))
-        thread.start()
 
 def ShutdownServer():
     try:
@@ -176,13 +185,13 @@ def ShutdownServer():
 if __name__ == "__main__":
     try:
         print("starting server..")
+        if "y" == input("Do you want to manage the chatroom?\nif not you have to use client to write").lower():
+            #thread for handleInput
+            threading.Thread(target=Write).start()
         server.bind((local_address, port_number))
         server.listen()
         users.append(server_user)
         print("server is listening..")
-
-        #thread for handleInput
-        threading.Thread(target=Write).start()
         Receive()
     except Exception as e:
         print(f"error in main_thread: {e}")
