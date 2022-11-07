@@ -49,6 +49,12 @@ def GetUserByIp(address):
             return user
     return None
 
+def GetNicknameByIp(address):
+    for user in users:
+        if user.Address == address:
+            return user.Nickname
+    return None
+
 def CreatePacket(header, data):
     return header + data
 
@@ -81,20 +87,23 @@ def PacketToUser(user, message):
     user.Client.send(CreatePacket(CreateHeader(local_address, "M", user.Address, "0"), message).encode('utf-8'))
 
 def BroadcastMessage(sender, message, source_address):
-    header = CreateHeader(source_address, "M", "255.255.255.255", "0")
-    if source_address == None:
-        header = CreateHeader(local_address, "M", "255.255.255.255", "0")
-    messages.append(message)
-    for user in users:
-        if sender != user:
-            if user.Is_server:
-                print(message)
-                continue
-            user.Client.send(CreatePacket(header, message).encode('utf-8'))
-
-def BroadcastPacket(sender, message):
     try:
-        header, data = GetPacket(message.decode('utf-8'))
+        header = CreateHeader(source_address, "M", "255.255.255.255", "0")
+        if source_address == None:
+            header = CreateHeader(local_address, "M", "255.255.255.255", "0")
+        messages.append(message)
+        for user in users:
+            if sender != user:
+                if user.Is_server:
+                    print(f"{GetNicknameByIp(source_address)}> {message}")
+                    continue
+                user.Client.send(CreatePacket(header, message).encode('utf-8'))
+    except Exception as e:
+        print(f"BroadcastMessage - error: {e}")
+
+def BroadcastPacket(sender, packet):
+    try:
+        header, data = GetPacket(packet.decode('utf-8'))
         source_address, mode, destination_addres, counter = GetHeader(header)
 
         message = data
@@ -104,11 +113,11 @@ def BroadcastPacket(sender, message):
             for user in users:
                 if sender != user:
                     if user.Is_server:
-                        print(message)
+                        print(f"{GetNicknameByIp(source_address)}> {message}")
                         continue
                     user.Client.send(CreatePacket(CreateHeader(source_address, "M", "255.255.255.255", "0"), message).encode('utf-8'))
     except Exception as e:
-        print(f"Broadcast - error: {e}")
+        print(f"BroadcastPacket - error: {e}")
 
 def Handle(user):
     while True:
@@ -116,15 +125,15 @@ def Handle(user):
             packet = user.Client.recv(BUFFER)
             header, data = GetPacket(packet.decode('utf-8'))
             source_address, mode, destination_addres, counter = GetHeader(header)
-            print(packet)
-            print(mode)
+            print(f"Packet: {packet}")
+            print(f"Mode: {mode}")
             
             if mode.lower() == 'a':
-                print(packet)
+                print(f"Mode: A = {packet}")
             if mode.lower() == 'm':
-                BroadcastMessage(user, packet, source_address)
+                BroadcastPacket(user, packet)
             if mode.lower() == 'f':
-                pass
+                print(f"Mode: F = {packet}")
             if mode.lower() == 'c':
                 if user.Is_admin:
                     data_items = data.split(' ')
@@ -143,10 +152,6 @@ def Handle(user):
                             BroadcastMessage(None, f"{user.Nickname} was kicked from the chat.",local_address)
                         else:
                             print("error not a valid user")
-                    if data_items[0] == "/ban":
-                        pass
-                    if data_items[0] == "/permaban":
-                        pass
         except Exception as e:
             print(f"Handle - error: {e}")
             users.remove(user)

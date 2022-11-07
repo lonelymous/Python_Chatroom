@@ -44,13 +44,16 @@ def Receive():
             break
         try:
             packet = client.recv(BUFFER).decode('utf-8')
+            print(packet)
             header, data = GetPacket(packet)
+            print(header)
             source_address, mode, destination_addres, counter = GetHeader(header)
             print(f"{source_address}> {data}")
         except Exception as e:
             print(f"Error - Receive: {e}")
+            print(e.args)
+            print(e.with_traceback())
             client.close()
-            sys.exit(1)
             break
         
 def Write():
@@ -63,14 +66,16 @@ def Write():
             if message == "":
                 continue
             if message.startswith('/'):
-                if message.startswith('/exit'):
+                if message.startswith("/exit"):
                     #//TODO send to the server that client is leaving?
                     print("You left the chat.")
                     stop_thread = True
                     client.close()
+                if message.startswith("/msg"):
+                    message_items = message.split(' ')
+                    client.send(CreatePacket(CreateHeader(local_address, 'C', message_items[1], "0"), message_items[2]).encode("utf-8"))
                 else:
-                    header = CreateHeader(local_address, "C", server_address, "0")
-                    client.send(CreatePacket(header, message).encode('utf-8'))
+                    client.send(CreatePacket(CreateHeader(local_address, 'C', server_address, "0"), message).encode('utf-8'))
             else:
                 header = CreateHeader(local_address, "M", "255.255.255.255", "0")
                 client.send(CreatePacket(header, message).encode('utf-8'))
