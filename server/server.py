@@ -6,15 +6,15 @@ class User:
     Nickname = None
     Address = None
     Client = None
-    IsAdmin = None
-    IsServer = None
+    Is_admin = None
+    Is_server = None
 
-    def __init__(self, nickname, address, client, isAdmin = False, isServer = False):
+    def __init__(self, nickname, address, client, is_admin = False, is_server = False):
         self.Nickname = nickname
         self.Address = address
         self.Client = client
-        self.IsAdmin = isAdmin
-        self.IsServer = isServer
+        self.Is_admin = is_admin
+        self.Is_server = is_server
 
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s.connect(("8.8.8.8", 80))
@@ -23,7 +23,7 @@ s.close()
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 port_number = 42069
-server_user = User(nickname="server",address=(local_address, port_number), client=None, isAdmin=True, isServer=True)
+server_user = User(nickname="server",address=(local_address, port_number), client=None, is_admin=True, is_server=True)
 
 stop_thread = False
 BUFFER = 1024
@@ -42,6 +42,12 @@ def DNSResolver(nickname):
         if user.Nickname == nickname:
             return user.Address
     return ""
+
+def GetUserByIp(address):
+    for user in users:
+        if user.Address == address:
+            return user
+    return None
 
 def CreatePacket(header, data):
     return header + data
@@ -74,15 +80,19 @@ def GetHeader(header):
 def PacketToUser(user, message):
     user.Client.send(CreatePacket(CreateHeader(local_address, "M", user.Address, "0"), message).encode('utf-8'))
 
-def BroadcastMessage(message):
+def BroadcastMessage(sender, message, source_address):
+    header = CreateHeader(source_address, "M", "255.255.255.255", "0")
+    if source_address == None:
+        header = CreateHeader(local_address, "M", "255.255.255.255", "0")
     messages.append(message)
     for user in users:
-        if user == server_user:
-            print(message)
-            continue
-        user.Client.send(CreatePacket(CreateHeader(local_address, "M", user.Address, "0"), message).encode('utf-8'))
+        if sender != user:
+            if user.Is_server:
+                print(message)
+                continue
+            user.Client.send(CreatePacket(header, message).encode('utf-8'))
 
-def BroadcastPacket(message, sender):
+def BroadcastPacket(sender, message):
     try:
         header, data = GetPacket(message.decode('utf-8'))
         source_address, mode, destination_addres, counter = GetHeader(header)
@@ -93,23 +103,55 @@ def BroadcastPacket(message, sender):
             messages.append(message)
             for user in users:
                 if sender != user:
-                    print(user)
-                    if user == server_user:
+                    if user.Is_server:
                         print(message)
                         continue
-                    user.Client.send(CreatePacket(CreateHeader(source_address, "M", user.Address, "0"), message).encode('utf-8'))
+                    user.Client.send(CreatePacket(CreateHeader(source_address, "M", "255.255.255.255", "0"), message).encode('utf-8'))
     except Exception as e:
         print(f"Broadcast - error: {e}")
 
 def Handle(user):
     while True:
         try:
-            BroadcastPacket(user.Client.recv(BUFFER),user)
+            packet = user.Client.recv(BUFFER)
+            header, data = GetPacket(packet.decode('utf-8'))
+            source_address, mode, destination_addres, counter = GetHeader(header)
+            print(packet)
+            print(mode)
+            
+            if mode.lower() == 'a':
+                print(packet)
+            if mode.lower() == 'm':
+                BroadcastMessage(user, packet, source_address)
+            if mode.lower() == 'f':
+                pass
+            if mode.lower() == 'c':
+                if user.Is_admin:
+                    data_items = data.split(' ')
+                    if data_items[0] == "/kick":
+                        user = data_items[1]
+                        #Check if IP
+                        if not user.__contains__('.'):
+                            user = DNSResolver(user)
+                        if IPChecker(user):
+                            #Check in users
+                            user = GetUserByIp(user)
+                            #kick => close connection via message
+                            PacketToUser(user, "You have been kicked from the chat!")
+                            users.remove(user)
+                            user.Client.close()
+                            BroadcastMessage(None, f"{user.Nickname} was kicked from the chat.",local_address)
+                        else:
+                            print("error not a valid user")
+                    if data_items[0] == "/ban":
+                        pass
+                    if data_items[0] == "/permaban":
+                        pass
         except Exception as e:
             print(f"Handle - error: {e}")
             users.remove(user)
             user.Client.close()
-            BroadcastMessage(f"{user.Nickname} left the chat.",None)
+            BroadcastMessage(None, f"{user.Nickname} left the chat.",local_address)
             break
 
 def GetLastMessages(user):
@@ -125,7 +167,7 @@ def Receive():
         if stop_thread:
             break
         client, address = server.accept()
-        print(f"Connected with {str(address)}")
+        print(f"Connected with {address}")
         
         header, data = GetPacket(client.recv(BUFFER).decode('utf-8'))
         source_address, mode, destination_addres, counter = GetHeader(header)
@@ -133,19 +175,19 @@ def Receive():
         data_items = data.split('|')
         nickname = data_items[0]
 
-        isAdmin=False
+        is_admin=False
         #//TODO save admin user to an .ini file.
         if nickname == "admin":
             if data_items[1] == "admin123":
-                isAdmin=True
+                is_admin=True
             else:
                 # I can't use PacketToUser() method because we don't initalize user yet.
                 client.send(CreatePacket(CreateHeader(local_address, "M", address, "0"), 'Authentication failed!').encode('utf-8'))
         
-        user = User(nickname=nickname, client=client, address=source_address, isAdmin=isAdmin, isServer=False)
+        user = User(nickname=nickname, client=client, address=source_address, is_admin=is_admin, is_server=False)
         users.append(user)
 
-        BroadcastMessage(f"{user.Nickname} joined the chat!",user)
+        BroadcastMessage(user, f"{user.Nickname} joined the chat!",local_address)
         PacketToUser(user, "Connected to the server!")
 
         #thread for handle
@@ -165,7 +207,7 @@ def Write():
                 stop_thread = True
                 continue
             else:
-                BroadcastMessage(message, server_user)
+                BroadcastMessage(server_user, message, local_address)
         except EOFError:
             if input("Are you sure you wanna shutdown the server? (y/n)").lower() == "y":
                 break
@@ -185,7 +227,7 @@ def ShutdownServer():
 if __name__ == "__main__":
     try:
         print("starting server..")
-        if "y" == input("Do you want to manage the chatroom?\nif not you have to use client to write").lower():
+        if "y" == input("Do you want to manage the chatroom?\nif not you have to use client to write.\n").lower():
             #thread for handleInput
             threading.Thread(target=Write).start()
         server.bind((local_address, port_number))

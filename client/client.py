@@ -1,4 +1,4 @@
-import threading, socket
+import threading, socket, sys
 BUFFER = 1024
 stop_thread = False
 
@@ -6,6 +6,8 @@ s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s.connect(("8.8.8.8", 80))
 local_address = s.getsockname()[0]
 s.close()
+
+server_address = None
 
 def CreatePacket(header, data):
     return header + data
@@ -46,8 +48,9 @@ def Receive():
             source_address, mode, destination_addres, counter = GetHeader(header)
             print(f"{source_address}> {data}")
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"Error - Receive: {e}")
             client.close()
+            sys.exit(1)
             break
         
 def Write():
@@ -66,27 +69,28 @@ def Write():
                     stop_thread = True
                     client.close()
                 else:
-                    print("Error")
+                    header = CreateHeader(local_address, "C", server_address, "0")
+                    client.send(CreatePacket(header, message).encode('utf-8'))
             else:
                 header = CreateHeader(local_address, "M", "255.255.255.255", "0")
                 client.send(CreatePacket(header, message).encode('utf-8'))
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"Error - write: {e}")
 
 if __name__ == "__main__":
     ip = input("Server ip and port: ")
-    ip_address = ip.split(':')[0]
+    server_address = ip.split(':')[0]
     port_number = int(ip.split(':')[1])
 
     nickname = input("Choose a nickname: ")
     password = " "
     if nickname == "admin":
-        password = input("Choose a password: ")
+        password = input("password: ")
 
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect((ip_address, port_number))
+    client.connect((server_address, port_number))
 
-    header = CreateHeader(local_address, "L", ip_address, "0")
+    header = CreateHeader(local_address, "L", server_address, "0")
     client.send(CreatePacket(header, f"{nickname}|{password}").encode('utf-8'))
 
     receive_thread = threading.Thread(target=Receive)
